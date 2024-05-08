@@ -1,0 +1,33 @@
+\documentclass{ctexart}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage[shortlabels]{enumitem}
+
+\title{计算方法第二次上机作业}
+\author{曾梦辰\thanks{学号: 202011999050}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{问题}
+已知以下两个方程均有一个实根, 分别使用二分法, Newton法, 割线法求近似根, 精确到小数点后$8$位, 然后对Newton法采用Aitken加速.
+\begin{align*}
+    &\sin{x}=6x+5\\
+    &\ln{x}+x^2=3
+\end{align*}
+
+\section{根的分析}
+设$f(x)=\sin{x}-6x-5$, $g(x)=\ln{x}+x^2-3$.
+那么有简单的不等式
+\[\begin{array}{ll}
+    f(-1)=\sin(-1)+1>0, & f(0)=-5<0;\\
+    g(1)=-2<0, & g(2)=\ln{2}+1>0.
+\end{array}\]
+因此使用二分法求根时, $f$的根在$[-1,0]$中搜索, $g$的根在$[1,2]$中搜索.
+使用Newton法与割线法迭代时, $f$使用$-1$作为起点, $g$使用$2$作为起点.
+
+\end{document}

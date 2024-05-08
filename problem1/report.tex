@@ -7,6 +7,7 @@
 \usepackage{geometry}
 \usepackage[shortlabels]{enumitem}
 \usepackage{hyperref}
+\usepackage[ruled,linesnumbered]{algorithm2e}
 
 \title{计算方法第一次上机作业}
 \author{曾梦辰\thanks{学号: 202011999050}}
@@ -28,9 +29,33 @@
     \item 按以上程序计算$S_{10^2},S_{10^4},S_{10^6}$, 并指出有效位数, 数据使用单精度格式储存.
     分析以上结果.
 \end{enumerate}
+\section{算法}
+我们分别使用以下算法进行计算.
+\begin{algorithm}
+    \caption{从大到小相加}
+    \KwIn{Natural number $N$}
+    \KwOut{$\sum_{2\leq j\leq N}\frac{1}{j^2-1}$}
+    Define $j=2,S=0$\;
+    \For{$j\leq N$}{
+        $S+=\frac{1}{j^2-1}$\;
+        $j+=1$}
+    return $S$
+\end{algorithm}
+
+\begin{algorithm}
+    \caption{从小到大相加}
+    \KwIn{Natural number $N$}
+    \KwOut{$\sum_{2\leq j\leq N}\frac{1}{j^2-1}$}
+    Define $j=N,S=0$\;
+    \For{$j\geq 2$}{
+        $S+=\frac{1}{j^2-1}$\;
+        $j-=1$}
+    return $S$
+\end{algorithm}
+
 
 \section{运行结果}
-程序参考附件1, 以下列举运行结果.
+程序源代码参考文件夹中的\verb|program.c|, 以下列举运行结果.
 \begin{table}[H]
     \centering
     \begin{tabular}{|c|c|c|c|}
@@ -49,10 +74,17 @@
 当$N=10^6$时, 从大到小计算有$3$为有效数, 从小到大计算有$4$位有效数, 自然$\varepsilon_1(10^6)>\varepsilon_2(10^6)$.
 
 \section{结果分析}
-通过以上结果可知, 从大到小计算的有效数位数总是不大于从小到大计算的有效数位数.
-这是因为计算时, 为了执行大数加小数的加法, 计算机会对齐大数与小数的有效数, 导致大数加小数时在计算后期大量损失有效数, 从而产生更大的误差.
+通过以上结果可以得到两点:
+\begin{enumerate}
+    \item 随着$N$增大, 两种算法的有效位数均在下降.
+    这是因为随着$N$增大, 计算量增大, 舍入误差逐渐累积导致绝对误差限增大.
+    \item 从大到小计算的有效数位数总是不大于从小到大计算的有效数位数.
+    这是因为计算时, 为了执行大数加小数的加法, 计算机会对齐大数与小数的有效数, 导致大数加小数时在计算后期大量损失有效数, 从而产生更大的误差.
+\end{enumerate}
 
-\section{附件}
-附件1: \verb|program.c|, 见文件夹中或\url{https://github.com/matthewzenm/Computational-Methods/blob/master/problem1/program.c}.
+
+\section{运行环境}
+\noindent 程序运行环境: Microsoft Corporation Surface Pro 6, Windows 11 23H2.\\
+编译器: gcc version 13.2.0 (Rev3, Built by MSYS2 project).
 
 \end{document}
