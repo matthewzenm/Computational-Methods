@@ -11,18 +11,25 @@ double itf2(double x);
 
 int main()
 {
-    double x=-1;
-    while (fabs(f1(x)/df1(x))>0.5e-8)
+    int n=0;
+    double x=-1,y=1;
+    while (fabs(y)>1e-8)
     {
-        x=(x*itf1(itf1(x))-itf1(x)*itf1(x))/(x-2*itf1(x)+itf1(itf1(x)));
+        y=(x*itf1(itf1(x))-itf1(x)*itf1(x))/(x-2*itf1(x)+itf1(itf1(x)))-x;
+        x+=y;
+        n++;
     }
-    printf("%.8lf\n",x);
+    printf("%.8lf %d\n",x,n);
     x=2;
-    while (fabs(f2(x)/df2(x))>0.5e-8)
+    y=1;
+    n=0;
+    while (fabs(y)>1e-8)
     {
-        x=(x*itf2(itf2(x))-itf2(x)*itf2(x))/(x-2*itf2(x)+itf2(itf2(x)));
+        y=(x*itf2(itf2(x))-itf2(x)*itf2(x))/(x-2*itf2(x)+itf2(itf2(x)))-x;
+        x+=y;
+        n++;
     }
-    printf("%.8lf",x);
+    printf("%.8lf %d\n",x,n);
     return 0;
 }
 

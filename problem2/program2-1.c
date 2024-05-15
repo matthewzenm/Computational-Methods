@@ -9,20 +9,24 @@ int sgn(double x);
 int main()
 {
     double a=-1.0,b=0.0;
+    int n=0;
     while(b-a>1e-8)
     {
         if (sgn(f1(a)*sgn(f1((a+b)/2)))<0) b=(b+a)/2;
         else a=(a+b)/2;
+        n++;
     }
-    printf("%.8lf\n",(a+b)/2);
+    printf("%.8lf %d\n",(a+b)/2,n);
     a=1.0;
     b=2.0;
+    n=0;
     while(b-a>1e-8)
     {
         if (sgn(f2(a)*sgn(f2((a+b)/2)))<0) b=(b+a)/2;
         else a=(a+b)/2;
+        n++;
     }
-    printf("%.8lf\n",(a+b)/2);
+    printf("%.8lf %d\n",(a+b)/2,n);
     return 0;
 }
 

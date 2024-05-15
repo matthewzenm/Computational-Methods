@@ -9,18 +9,22 @@ double df2(double x);
 
 int main()
 {
+    int n=0;
     double x=-1;
     while (fabs(f1(x)/df1(x))>1e-8)
     {
         x=x-f1(x)/df1(x);
+        n++;
     }
-    printf("%.8lf\n",x);
+    printf("%.8lf %d\n",x,n);
     x=2;
+    n=0;
     while (fabs(f2(x)/df2(x))>1e-8)
     {
         x=x-f2(x)/df2(x);
+        n++;
     }
-    printf("%.8lf",x);
+    printf("%.8lf %d\n",x,n);
     return 0;
 }
 

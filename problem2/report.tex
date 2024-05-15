@@ -5,6 +5,10 @@
 \usepackage{amssymb}
 \usepackage{geometry}
 \usepackage[shortlabels]{enumitem}
+\usepackage{float}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+
+\DeclareMathOperator{\sgn}{sgn}
 
 \title{计算方法第二次上机作业}
 \author{曾梦辰\thanks{学号: 202011999050}}
@@ -29,5 +33,84 @@
 \end{array}\]
 因此使用二分法求根时, $f$的根在$[-1,0]$中搜索, $g$的根在$[1,2]$中搜索.
 使用Newton法与割线法迭代时, $f$使用$-1$作为起点, $g$使用$2$作为起点.
+
+\section{算法}
+以下列举二分法, Newton法, 割线法与使用Aitken加速的Newton法.
+
+\begin{algorithm}[H]
+    \caption{二分法}
+    \KwIn{Function $f$, real number $a,b$ with $a<b$}
+    \KwOut{Solution of $f(x)=0$}
+    $a_0=a,b_0=b$\;
+    \While{$b_n-a_n>1\times 10^{-8}$}{
+        \eIf{$\sgn((b_n+a_n)/2)\sgn{a_n}<0$}{
+            $a_{n+1}=a_n$\;
+            $b_{n+1}=\dfrac{b_n+a_n}{2}$\;
+            $n++$\;
+        }{
+            $a_{n+1}=\dfrac{b_n+a_n}{2}$\;
+            $b_{n+1}=b_n$\;
+            $n++$\;
+        }
+    }
+    return $(a_n+b_n)/2$\;
+\end{algorithm}
+
+\begin{algorithm}[H]
+    \caption{Newton法}
+    \KwIn{Function $f$, real number $a$}
+    \KwOut{Solution of $f(x)=0$}
+    $a_0=a$\;
+    \While{$|a_n-a_{n-1}|>1\times 10^{-8}$}{
+        $a_{n+1}=a_n-\dfrac{f(a_n)}{f'(a_n)}$\;
+        $n++$\;
+    }
+    return $a_n$\;
+\end{algorithm}
+
+\begin{algorithm}[H]
+    \caption{割线法}
+    \KwIn{Function $f$, real number $a,b$ with $a<x_0<b$, where $f(x_0)=0$}
+    \KwOut{Solution of $f(x)=0$, i.e. $x_0$}
+    $a_0=a,a_1=b$\;
+    \While{$|a_n-a_{n-1}|>1\times 10^{-8}$}{
+        $a_{n+1}=a_n-\dfrac{(a_n-a_{n-1})f(a_{n-1})}{f(a_n)-f(a_{n-1})}$\;
+        $n++$\;
+    }
+    return $a_n$\;
+\end{algorithm}
+
+\begin{algorithm}[H]
+    \caption{使用Aitken加速的Newton法}
+    \KwIn{Function $f$, real number $a$}
+    \KwOut{Solution of $f(x)=0$}
+    Define function $\varphi(x)=x-\dfrac{f(x)}{f'(x)}$, $\Phi(x)=\dfrac{x\varphi(\varphi(x))-\varphi^2(x)}{x-2\varphi(x)+\varphi(\varphi(x))}$\;
+    \While{$|a_n-a_{n-1}|>1\times 10^{-8}$}{
+        $a_{n+1}=\Phi(a_n)$\;
+        $n++$\;
+    }
+    return $a_n$\;
+\end{algorithm}
+
+\section{运行结果}
+程序源代码分别参考文件夹中的\verb|program2-1.c|至\verb|program2-4.c|.
+\begin{table}[H]
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+     & 二分法 & Newton法 & 割线法 & Aitken加速的Newton法 \\ \hline
+    $f$的零点 & $-0.97089892$ & $-0.97089892$ & $-0.97089892$ & $-0.97089892$ \\ \hline
+    $g$的零点 & $1.59214294$ & $1.59214295$ & $1.59214294$ & $1.59214294$ \\ \hline
+    $f$的迭代次数 & $27$ & $2$ & $4$ & $32$ \\ \hline
+    $g$的迭代次数 & $27$ & $3$ & $6$ & $102$ \\ \hline
+    \end{tabular}
+    \caption{结果图表}
+\end{table}
+
+可以得到迭代效率Newton法$>$割线法$>$二分法$>$Aitken加速的Newton法.
+使用Aitken加速后反而迭代效率降低的原因尚不清楚.
+
+\section{运行环境}
+\noindent 程序运行环境: Dell Inspiron 14 Plus 7420, Linux 5.15.146.1-microsoft-standard-WSL2.\\
+编译器: gcc version 9.4.0 (Ubuntu 9.4.0-Ubuntu 20.04.2)
 
 \end{document}
