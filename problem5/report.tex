@@ -1,0 +1,140 @@
+\documentclass[a4paper]{ctexart}
+
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[shortlabels]{enumitem}
+\usepackage{float}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+\usepackage{siunitx}
+\usepackage{fixdif}
+% \usepackage{hyperref}
+
+\title{第五次上机作业}
+\author{曾梦辰\thanks{学号: 202011999050}}
+\date{\today}
+
+\theoremstyle{plain}
+\newtheorem{pro}{问题}
+\newtheorem*{lem}{引理}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+    本次作业给出通过复化梯形法, 复化Simpson法, 复化Cotes法以及复化Gauss法计算数值积分的通用函数.
+    在本次作业中我们使用通用函数计算正弦函数与余弦函数的数值积分, 并数值验证各个公式的收敛阶.
+\end{abstract}
+
+\section{问题}
+本次作业解决如下两个问题.
+\begin{pro}\label{pro1}
+    编写一个计算一维数值积分的函数, 要求把被积函数$f$, 积分区间$[a,b]$, 小区间个数$n$以及采用的数值积分方法 (包括复化梯形法, 复化Simpson法, 复化Cotes法以及复化Gauss法) 作为参数.
+\end{pro}
+
+\begin{pro}
+    利用问题~\ref{pro1}~中的函数计算两个算例, 验证各种积分公式的收敛阶.
+\end{pro}
+
+\section{计算公式}
+给定区间个数$n$, 考虑被积函数$f$在区间$[a,b]$上的积分, 设$h=\dfrac{b-a}{n}$, 我们有以下公式:
+\begin{itemize}
+    \item 复化梯形法
+    \[\int_a^bf(x)\d{x}\approx\mathcal{I}_1(f,a,b,n):=\frac{h}{2}\sum_{i=0}^{n-1}(f(a+ih)+f(a+(i+1)h))\]
+    \item 复化Simpson法
+    \begin{align*}
+        \int_a^bf(x)\d{x}\approx\mathcal{I}_2(f,a,b,n):=\frac{h}{6}\sum_{i=0}^{n-1}&(f(a+ih)\\
+        &+4f(a+(i+1/2)h)+f(a+(i+1)h))
+    \end{align*}
+    \item 复化Cotes法
+    \begin{align*}
+        \int_a^bf(x)\d{x}\approx\mathcal{I}_3(f,a,b,n):=\frac{h}{90}\sum_{i=0}^{n-1}&(7f(a+ih)+32f(a+(i+1/4)h)\\
+        &+12f(a+(i+1/2)h)+32f(a+(i+3/4)h)\\
+        &+7f(x+(i+1)h))
+    \end{align*}
+    \item 复化Gauss法
+    \[\int_a^bf(x)\d{x}\approx\mathcal{I}_4(f,a,b,n):=\sum_{i=0}^{n-1}g(f,a+ih,a+(i+1)h)\]
+    其中辅助函数
+    \begin{align*}
+        g(f,a,b):=&\frac{5}{9}f\left(-\sqrt{\frac{3}{5}}\left(\frac{b-a}{2}\right)+\frac{a+b}{2}\right)+\frac{8}{9}f\left(\frac{a+b}{2}\right)\\
+        &+\frac{5}{9}f\left(\sqrt{\frac{3}{5}}\left(\frac{b-a}{2}\right)+\frac{a+b}{2}\right)
+    \end{align*}
+\end{itemize}
+
+在头文件\verb|integral.h|中, 我们编写了每种方法计算数值积分相对应的函数, 函数通过函数指针给出.
+在本例中, 我们使用正弦函数在$[0,\pi]$上积分, 取节点数$n=1\text{(不复化)},\num{1e2},\num{1e4},\num{1e8}$计算对应区间上的数值积分.
+最后, 我们取节点数$n=\num{1e2},\num{1e4},\num{1e8}$分别计算
+\[\frac{1}{h^{p_i}}\left(\int_0^\pi\sin{x}\d{x}-\mathcal{I}_i(\sin{x},0,\pi,n)\right),\quad i=1,2,3,4\]
+的值, 来验证各个积分公式的收敛阶.
+其中复化梯形法$p_1=2$, 复化Simpson法$p_2=4$, 复化Cotes法$p_3=6$, 复化Gauss法$p_4=6$ (复化Gauss法的收敛阶会在附录~\ref{gauss}~中给出证明).
+执行计算的程序源码在\verb|program5-1.c|中.
+
+
+\section{计算结果}
+
+我们在本节给出四种积分格式的计算结果.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+    $n=$ & $1$ & $\num{1e2}$ & $\num{1e4}$ & $\num{1e8}$ \\ \hline
+    $\int_{[0,\pi]}\sin{x}\approx$ & 0.00000000 & 1.99983550 & 1.99999998 & 2.00000000 \\[4pt] \hline
+    $2$阶相对误差$=$ & 0.31830989 & 0.52093559 & 0.52095225 & 0.52095225 \\ \hline
+    \end{tabular}
+    \caption{复化梯形法的结果}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+    $n=$ & $1$ & $\num{1e2}$ & $\num{1e4}$ & $\num{1e8}$ \\ \hline
+    $\int_{[0,\pi]}\sin{x}\approx$ & 2.09439510 & 2.00000000 & 2.00000000 & 2.00000000 \\ \hline
+    $4$阶相对误差 & 0.05375256 & 0.05278350 & 0.05278350 & 0.05278350 \\ \hline
+    \end{tabular}
+    \caption{复化Simpson法的结果}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+    $n=$ & $1$ & $\num{1e2}$ & $\num{1e4}$ & $\num{1e8}$ \\ \hline
+    $\int_{[0,\pi]}\sin{x}=$ & 1.99857073 & 2.00000000 & 2.00000000 & 2.00000000 \\ \hline
+    $6$阶相对误差$=$ & 0.00534660 & 0.00534809 & 0.00534809 & 0.00534809 \\ \hline
+    \end{tabular}
+    \caption{复化Cotes法的结果}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+    $n=$ & $1$ & $\num{1e2}$ & $\num{1e4}$ & $\num{1e8}$ \\ \hline
+    $\int_{[0,\pi]}\sin{x}\approx$ & 2.00138891 & 2.00000000 & 2.00000000 & 2.00000000 \\ \hline
+    $6$阶相对误差$=$ & 0.00534953 & 0.00534809 & 0.00534809 & 0.00534809 \\ \hline
+    \end{tabular}
+    \caption{复化Gauss法的结果}
+\end{table}
+
+\section{运行环境}
+\noindent 程序运行环境: Dell Inspiron 14 Plus 7420, Linux 5.15.146.1-microsoft-standard-WSL2.\\
+编译器: gcc version 9.4.0 (Ubuntu 9.4.0-Ubuntu 20.04.2)
+
+\appendix
+
+\section{复化Gauss法的收敛阶的证明}\label{gauss}
+我们在本节中证明复化Gauss法的收敛阶数为$6$阶.
+
+\section{程序program5-1的使用说明}
+(\textit{本段说明同时也包含在源代码中.})
+
+本程序是\verb|integral.h|中定义的用于计算数值积分的通用函数的示例程序, 我们选择正弦函数与余弦函数作为数值积分的测试函数.
+当第一个提示出现时, 你应当输入``sin''或``cos''.
+接下来, 当下一个提示出现时, 你应该选择以下方法之一进行计算: 复化梯形法, 复化Simpson法, 复化Cotes法或复化Gauss法则, 分别输入``trap'', ``simp'', ``cote''和``gauss''.
+最后一个提示会要求你输入区间和步数.
+当所有这些都完成后, 程序将输出数值积分的值和$p$阶相对误差, 其中误差的阶数$p$是该方法的收敛阶.
+
+\end{document}
