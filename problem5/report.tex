@@ -17,7 +17,13 @@
 
 \theoremstyle{plain}
 \newtheorem{pro}{问题}
-\newtheorem*{lem}{引理}
+\newtheorem{prop}{命题}[section]
+\newtheorem{lem}[prop]{引理}
+\newtheorem{cor}[prop]{推论}
+\theoremstyle{remark}
+\newtheorem{rem}[prop]{评注}
+
+\numberwithin{equation}{section}
 
 \begin{document}
 \maketitle
@@ -67,7 +73,7 @@
 最后, 我们取节点数$n=\num{1e2},\num{1e4},\num{1e8}$分别计算
 \[\frac{1}{h^{p_i}}\left(\int_0^\pi\sin{x}\d{x}-\mathcal{I}_i(\sin{x},0,\pi,n)\right),\quad i=1,2,3,4\]
 的值, 来验证各个积分公式的收敛阶.
-其中复化梯形法$p_1=2$, 复化Simpson法$p_2=4$, 复化Cotes法$p_3=6$, 复化Gauss法$p_4=6$ (复化Gauss法的收敛阶会在附录~\ref{gauss}~中给出证明).
+其中复化梯形法$p_1=2$, 复化Simpson法$p_2=4$, 复化Cotes法$p_3=6$, 复化 ($3$点) Gauss法$p_4=6$ (复化Gauss法的收敛阶会在附录~\ref{gauss}~中给出证明).
 执行计算的程序源码在\verb|program5-1.c|中.
 
 
@@ -126,7 +132,59 @@
 \appendix
 
 \section{复化Gauss法的收敛阶的证明}\label{gauss}
-我们在本节中证明复化Gauss法的收敛阶数为$6$阶.
+我们在本节中证明复化$3$点Gauss法的收敛阶数为$6$阶.
+事实上, 我们有如下命题:
+\begin{prop}\label{order}
+    设$\ell$点积分格式$\sum_{j=1}^\ell A_jf(t_j)$ ($a\leq t_1<t_2<\cdots<t_n\leq b$为节点) 具有$k$阶代数精度, 且$A_j>0$, $i=1,\cdots,n$.
+    等分区间$[a,b]$为$a=a_0<a_1<\cdots<a_{n-1}<a_n=b$, 取复化积分格式
+    \[I_n=\sum_{i=0}^{n-1}\sum_{j=1}^\ell A_jf(t_{ij})\]
+    其中$t_{ij}=a_i+\frac{(b-a)t_j}{n}$是对应等分区间$[a_i,a_{i+1}]$上的节点.
+    那么复化积分格式具有收敛阶$k+1$, 即对所有光滑函数$f$有
+    \begin{equation}
+        \limsup_{n\to\infty}\frac{|I(f)-I_n(f)|}{h^{k+1}}<+\infty\label{A1}
+    \end{equation}
+    其中$h=(b-a)/n,I(f)=\int_a^bf(x)\d{x}$.
+\end{prop}
+\begin{proof}
+    不妨设$a=0,b=1$.
+    我们证明对任意的$f\in C^\infty([0,1])$, 有~\eqref{A1}~成立.
+    给定$f\in C^\infty([0,1])$, 考虑其Taylor展式
+    \[f(x)=p_i(x)+R_i(x)\]
+    其中
+    \[p_i(x)=\sum_{\ell=0}^k\frac{f^{(\ell)}}{\ell!}(x-a_i)^\ell,\ R_i(x)=\frac{f^{(k+1)}(\xi_i)}{(k+1)!}(x-a_i)^{k+1}\]
+    且$\xi_i\in(a_i,x)$.
+    由于积分格式具有$k$阶代数精度, 我们有
+    \begin{align*}
+        &\left|\int_{a_i}^{a_{i+1}}f(x)\d{x}-\sum_{j=1}^nA_jf(t_{ij})\right|\\
+        =&\left|\int_{a_i}^{a_{i+1}}(f(x)-p_i(x))\d{x}+\sum_{j=1}^nA_j(p_i(t_{ij})-f(t_{ij}))\right|\\
+        \leq&\left|\int_{a_i}^{a_{i+1}}\frac{f^{(k+1)}(\xi_i)}{(k+1)!}(x-a_i)^{k+1}\right|+\left|\sum_{j=1}^n\frac{f^{(k+1)}(\xi_i)}{(k+1)!}A_j(t_{ij}-a_i)^{k+1}\right|\\
+        \leq&\frac{\max_{[a_i,a_{i+1}]}|f^{(k+1)}|}{(k+2)!}h^{k+2}+\frac{\max_{[a_i,a_{i+1}]}|f^{(k+1)}|}{(k+1)!}\sum_{j=1}^n|A_j|(t_{ij}-a_i)^{k+1}\\
+        <&\frac{\max_{[a_i,a_{i+1}]}|f^{(k+1)}|}{(k+2)!}h^{k+2}+\frac{h\max_{[a_i,a_{i+1}]}|f^{(k+1)}|}{(k+1)!}\sum_{j=1}^nA_j(t_{ij}-a_i)^{k}\\
+        =&\frac{\max_{[a_i,a_{i+1}]}|f^{(k+1)}|}{(k+2)!}h^{k+2}+\frac{h\max_{[a_i,a_{i+1}]}|f^{(k+1)}|}{(k+1)!}\int_{a_i}^{a_{i+1}}(x-a_i)^k\d{x}\\
+        =&\left(\frac{1}{k+1}+\frac{1}{k+2}\right)\frac{\max_{[a_i,a_{i+1}]}|f^{(k+1)}|}{(k+1)!}h^{k+2}
+    \end{align*}
+    因此就有
+    \begin{align*}
+        \frac{1}{h^{k+1}}\left|\int_0^1f(x)\d{x}-\sum_{i=0}^{n-1}\sum_{j=1}^nA_jf(t_{ij})\right|&\leq\sum_{i=0}^{n-1}\left(\frac{1}{k+1}+\frac{1}{k+2}\right)\frac{\max_{[a_i,a_{i+1}]}|f^{(k+1)}|}{(k+1)!}h^{k+2}\\
+        &=\left(\frac{1}{k+1}+\frac{1}{k+2}\right)\frac{1}{(k+1)!}\sum_{i=0}^{n-1}\max_{[a_i,a_{i+1}]}|f^{(k+1)}|h
+    \end{align*}
+    取极限有
+    \[\limsup_{n\to\infty}\frac{|I(f)-I_n(f)|}{h^{k+1}}\leq\left(\frac{1}{k+1}+\frac{1}{k+2}\right)\frac{1}{(k+1)!}\int_0^1|f^{(k+1)}(x)|\d{x}\]
+\end{proof}
+
+\begin{cor}
+    复化$3$点Gauss法的收敛阶数为$6$.
+\end{cor}
+\begin{proof}
+    我们知道$n+1$点的Gauss法具有$2n+1$阶的代数精度, 由命题~\ref{order}~可知, $n+1$点的Gauss法具有$2n+2$阶的收敛阶.
+    代入$n=2$即得到结论.
+\end{proof}
+
+\begin{rem}
+    我尝试了证明极限
+    \[\lim_{n\to\infty}\frac{I(f)-I_n(f)}{h^{k+1}}\]
+    一定存在, 但没有成功.
+\end{rem}
 
 \section{程序program5-1的使用说明}
 (\textit{本段说明同时也包含在源代码中.})
