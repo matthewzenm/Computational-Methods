@@ -1,0 +1,149 @@
+\documentclass[a4paper]{article}
+
+\usepackage{ctex}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[shortlabels]{enumitem}
+\usepackage{float}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+\usepackage{siunitx}
+\usepackage{fixdif}
+% \usepackage{hyperref}
+
+\title{第六次上机作业}
+\author{曾梦辰\thanks{学号: 202011999050}}
+\date{\today}
+
+\theoremstyle{plain}
+\newtheorem{pro}{问题}
+\newtheorem{prop}{命题}[section]
+\newtheorem{lem}[prop]{引理}
+\newtheorem{cor}[prop]{推论}
+\theoremstyle{remark}
+\newtheorem{rem}[prop]{评注}
+
+\numberwithin{equation}{section}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+    本次作业中我们给出Euler法, 修正Euler法以及经典Runger--Kutter法求解常微分方程数值解的通用程序.
+    同时, 我们通过计算一个初值问题验证以上方法的收敛阶.
+\end{abstract}
+
+\section{问题}
+本次作业解决如下两个问题.
+\begin{pro}\label{pro1}
+    分别使用Euler法, 修正Euler法以及经典Runger--Kutter法, 编写一个计算常微分方程初值问题数值解的通用程序, 要求以初值问题的方程$f(x,y)$与初值$y_0$, 区间个数$n$, 起点与终点$x_0,x_{\mathrm{end}}$作为参数.
+\end{pro}
+
+\begin{pro}
+    利用问题~\ref{pro1}~中的通用程序计算初值问题
+    \begin{equation}
+        \begin{cases}
+            y'=-x^2y^2,& 0\leq x\leq 1.5\\
+            y(0)=3
+        \end{cases}\label{ode}
+    \end{equation}
+    与精确解$y(x)=3/(1+x^3)$作比较, 取不同的步长验证各个方法的收敛阶.
+\end{pro}
+
+\section{计算公式}
+给定初值问题
+\[\begin{cases}
+    y'=f(x,y),& x\in[a,b]\\
+    y(a)=y_0
+\end{cases}\]
+将$[a,b]$等分为$n$个小区间$a=x_0<x_1<\cdots<x_{n-1}<x_n=b$, 记$y(x_i)$的近似值为$y_i$.
+设步长$h=\dfrac{b-a}{n}$, 那么我们有计算公式:
+\begin{itemize}
+    \item Euler法:
+    \[y_{i+1}=y_i+hf(x_i,y_i)\]
+    \item 改进Euler法:
+    \[\begin{cases}
+        y_{i+1}^{(p)}=y_i+hf(x_i,y_i)\\
+        y_{i+1}=y_i+\frac{h}{2}(f(x_i,y_i)+f(x_{i+1},y_{i+1}^{(p)}))
+    \end{cases}\]
+    也即
+    \[y_{i+1}=y_i+\frac{h}{2}(f(x_i,y_i)+f(x_{i+1},y_i+hf(x_i,y_i)))\]
+    \item 经典Runger--Kutter法:
+    \[y_{i+1}=y_i+\frac{h}{6}(k_1+2k_2+2k_3+k_4)\]
+    其中
+    \[\begin{array}{l}
+        k1=f(x_n,y_n)\\
+        k2=f\left(x_n+\frac{h}{2},y_n+\frac{h}{2}k_1\right)\\
+        k3=f\left(x_n+\frac{h}{2},y_n+\frac{h}{2}k_2\right)\\
+        k4=f(x_n+h,hk_3)
+    \end{array}\]
+\end{itemize}
+
+在头文件\verb|ode.h|中, 我们编写了这三种方法对应的程序, 输入的方程与精确解通过函数指针给出.
+对给定的初值问题~\eqref{ode}, 我们分别取区间个数$n=\num{1e2},\num{5e2},\num{1e3},\num{5e3},\num{1e4}$进行数值计算, 并计算在$y_0=0$处的局部截断误差
+\[R=\frac{1}{h^p}(y(x_{1}-y(x_0)-g(x_0,x_1,y_0,y_1)))\]
+其中Euler法取$g(x_0,x_1,y_0,y_1)=hf(x_0,y_0)$, $p=2$;
+修正Euler法取$g(x_0,x_1,y_0,y_1)=\frac{h}{2}(f(x_0,y_0)+f(x_{1},y_0+hf(x_0,y_0)))$, $p=3$;
+经典Runger--Kutter法取$g(x_0,x_1,y_0,y_1)=\frac{h}{6}(k_1+2k_2+2k_3+k_4)$, $p=4$.
+我们将数值验证$R$在$0$处收敛到一个固定值.
+执行计算的程序源代码在\verb|program6.c|中.
+
+\section{计算结果}
+
+我们在本节给出三种方法在点$x=0.5,1,1.5$处的值以及截断误差.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|l|}
+    \hline
+    $n=$ & $\num{1e2}$ & $\num{5e2}$ & $\num{1e3}$ & $\num{5e3}$ & $\num{1e4}$ \\ \hline
+    $x=0.5$ & 2.660361 & 2.667187 & 2.666037 & 2.666718 & 2.666604 \\ \hline
+    $x=1.0$ & 1.492714 & 1.496308 & 1.499281 & 1.498956 & 1.499591 \\ \hline
+    $x=1.5$ & 0.666441 & 0.681845 & 0.683779 & 0.685327 & 0.685521 \\ \hline
+    $R=$ & $-0.045000$ & $-0.009000$ & $-0.004500$ & $-0.000900$ & $-0.000450$ \\ \hline
+    \end{tabular}
+    \caption{Euler法的结果}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|l|}
+    \hline
+    $n=$ & $\num{1e2}$ & $\num{5e2}$ & $\num{1e3}$ & $\num{5e3}$ & $\num{1e4}$ \\ \hline
+    $x=0.5$ & 2.648524 & 2.664881 & 2.664885 & 2.666489 & 2.666489 \\ \hline
+    $x=1.0$ & 1.488815 & 1.495506 & 1.498876 & 1.498875 & 1.499888 \\ \hline
+    $x=1.5$ & 0.670155 & 0.682553 & 0.684130 & 0.685397 & 0.685556 \\ \hline
+    $R=$ & 1.500010 & 1.500000 & 1.500000 & 1.500013 & 1.499931 \\ \hline
+    \end{tabular}
+    \caption{改进Euler法的结果}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|l|}
+    \hline
+    $n=$ & $\num{1e2}$ & $\num{5e2}$ & $\num{1e3}$ & $\num{5e3}$ & $\num{1e4}$ \\ \hline
+    $x=0.5$ & 2.648653 & 2.664887 & 2.664887 & 2.666489 & 2.666489 \\ \hline
+    $x=1.0$ & 1.488778 & 1.495505 & 1.498875 & 1.499550 & 1.499888 \\ \hline
+    $x=1.5$ & 0.670052 & 0.682549 & 0.684129 & 0.685397 & 0.685556 \\ \hline
+    $R=$ & 0.000042 & 0.000002 & 0.000004 & 0.043033 & $-0.462192$ \\ \hline
+    \end{tabular}
+    \caption{经典Runger--Kutter法的结果}
+\end{table}
+
+\subsection*{结论}
+
+\begin{prop}
+    Euler法具有$2$阶精度, 改进Euler法具有$3$阶精度, 经典Runger--Kutter法具有$4$阶精度.
+\end{prop}
+
+\begin{rem}
+    注意到当$n$很大时, Runger--Kutter法的$R$在偏离$0$, 我们猜测这是因为两个很小的数相除带来了较大的误差.
+\end{rem}
+
+\section{运行环境}
+\noindent 程序运行环境: Dell Inspiron 14 Plus 7420, Linux 5.15.146.1-microsoft-standard-WSL2.\\
+编译器: gcc version 9.4.0 (Ubuntu 9.4.0-Ubuntu 20.04.2)
+
+\end{document}
