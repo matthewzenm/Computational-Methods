@@ -1,0 +1,117 @@
+\documentclass{article}
+
+\usepackage{ctex}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+\usepackage{float}
+
+\title{计算方法第三次上机作业}
+\author{曾梦辰\thanks{学号: 202011999050}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{问题}
+使用追赶法求解线性方程$AX=Y$的解, 其中
+\begin{itemize}
+    \item $A$为三对角矩阵
+    \[A=\begin{bmatrix}
+        b_1 & c_1 & 0 & \cdots & 0 & 0 & 0 \\
+        a_2 & b_2 & c_2 & \cdots & 0 & 0 & 0 \\
+        0 & a_3 & b_3 & \cdots & 0 & 0 & 0 \\
+        \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots \\
+        0 & 0 & 0 & \cdots & a_{n-1} & b_{n-1} & c_{n-1} \\
+        0 & 0 & 0 & \cdots & 0 & a_n & b_n
+    \end{bmatrix}\]
+    \item $A$为周期三对角矩阵
+    \[A=\begin{bmatrix}
+        b_1 & c_1 & 0 & \cdots & 0 & 0 & a_1 \\
+        a_2 & b_2 & c_2 & \cdots & 0 & 0 & 0 \\
+        0 & a_3 & b_3 & \cdots & 0 & 0 & 0 \\
+        \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots \\
+        0 & 0 & 0 & \cdots & a_{n-1} & b_{n-1} & c_{n-1} \\
+        c_n & 0 & 0 & \cdots & 0 & a_n & b_n
+    \end{bmatrix}\]
+\end{itemize}
+要求采用矩阵稀疏存储的技巧, 并将求解过程写成函数形式.
+
+\section{算法}
+
+追赶法本质为Gauss消元法, 我们列举伪代码如下:
+
+\begin{algorithm}[H]
+    \caption{追赶法}
+    \KwIn{Tridiagonal matrix $A$, column vector $Y$}
+    \KwOut{Solution of $AX=Y$}
+    $i=2$\;
+    \While{$i\leq n$}{
+        $b_i=b_i-a_{i}c_{i-1}/b_{i-1}$\;
+        $y_i=y_i-a_{i}y_{i-1}/b_{i-1}$\;
+        $i++$\;
+    }
+    $x_n=y_n/b_n$\;
+    $i=n-1$\;
+    \While{$i>0$}{
+        $x_i=(y_i-c_ix_{i+1})/b_i$\;
+        $i--$\;
+    }
+    return $X=(x_1,\cdots,x_n)^\top$\;
+\end{algorithm}
+
+对于周期三对角矩阵, 我们作分解
+\[A=\begin{bmatrix}
+    b_1 & c_1 & 0 & \cdots & 0 & 0 & 0 \\
+    a_2 & b_2 & c_2 & \cdots & 0 & 0 & 0 \\
+    \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots \\
+    0 & 0 & 0 & \cdots & a_{n-2} & b_{n-2} & c_{n-2} \\
+    0 & 0 & 0 & \cdots & 0 & a_{n-1} & b_{n-1}
+\end{bmatrix}\begin{bmatrix}
+    u_1 \\ u_2 \\ \vdots \\ u_{n-2} \\ u_{n-1}
+\end{bmatrix}=\begin{bmatrix}
+    -a_1 \\ 0 \\ \vdots \\ 0 \\ -c_{n-1}
+\end{bmatrix}\]
+及
+\[A=\begin{bmatrix}
+    b_1 & c_1 & 0 & \cdots & 0 & 0 & 0 \\
+    a_2 & b_2 & c_2 & \cdots & 0 & 0 & 0 \\
+    \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots \\
+    0 & 0 & 0 & \cdots & a_{n-2} & b_{n-2} & c_{n-2} \\
+    0 & 0 & 0 & \cdots & 0 & a_{n-1} & b_{n-1}
+\end{bmatrix}\begin{bmatrix}
+    v_1 \\ v_2 \\ \vdots \\ v_{n-2} \\ v_{n-1}
+\end{bmatrix}=\begin{bmatrix}
+    y_1 \\ y_2 \\ \vdots \\ y_{n-2} \\ y_{n-1}
+\end{bmatrix}\]
+使用追赶法解出$U$和$V$, 那么可以验证
+\[x_n=\frac{y_n-c_nv_1-a_nv_{n-1}}{b_n+c_nu_1+a_nu_{n-1}}\]
+及
+\[x_i=u_ix_n+v_i,\ i=1,2,\cdots,n-1\]
+给出了解向量$X$.
+
+\section{运行结果}
+我们使用两个工作示例:
+\[\begin{bmatrix}
+    1 & 1 \\
+    2 & 1
+\end{bmatrix}X=\begin{bmatrix}
+    2 \\ 1
+\end{bmatrix}\]
+代码\verb|program3-1.c|编译的程序给出正确结果$(-1,3)^\top$;
+\[\begin{bmatrix}
+    1 & 1 & 1 \\
+    0 & 2 & 0 \\
+    1 & 0 & 3
+\end{bmatrix}X=\begin{bmatrix}
+    1 \\ 1 \\ 0
+\end{bmatrix}\]
+代码\verb|program3-2.c|编译的程序给出正确结果$\left(\dfrac{3}{4},\dfrac{1}{2},-\dfrac{1}{4}\right)^\top$.
+
+\section{运行环境}
+\noindent 程序运行环境: Dell Inspiron 14 Plus 7420, Linux 5.15.146.1-microsoft-standard-WSL2.\\
+编译器: gcc version 9.4.0 (Ubuntu 9.4.0-Ubuntu 20.04.2)
+
+\end{document}
